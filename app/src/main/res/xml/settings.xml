@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory android:title="General">
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:disableDependentsState="true"
+            android:key="@string/pref_key_enable_background_play"
+            android:persistent="true"
+            android:summary="@string/pref_summary_enable_background_play"
+            android:title="@string/pref_title_enable_background_play"/>
+    </PreferenceCategory>
+
+</PreferenceScreen>
