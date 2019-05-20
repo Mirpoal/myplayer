@@ -3,6 +3,8 @@ package com.felix.ijkplayer.fragments;
 import android.os.Bundle;
 import android.support.v7.preference.PreferenceFragmentCompat;
 
+import com.felix.ijkplayer.R;
+
 public class SettingsFragment extends PreferenceFragmentCompat {
 
     public static SettingsFragment newInstance() {
@@ -12,6 +14,6 @@ public class SettingsFragment extends PreferenceFragmentCompat {
 
     @Override
     public void onCreatePreferences(Bundle bundle, String s) {
-        addPreferencesFromResource(android.R.);
+        addPreferencesFromResource(R.xml.settings);
     }
 }

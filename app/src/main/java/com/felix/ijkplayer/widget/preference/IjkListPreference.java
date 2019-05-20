@@ -23,8 +23,11 @@ import android.support.v7.preference.ListPreference;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 
-import tv.danmaku.ijk.media.example.R;
+import com.felix.ijkplayer.R;
 
+/**
+ *  自定义 view
+ */
 public class IjkListPreference extends ListPreference {
     private CharSequence[] mEntrySummaries;
 

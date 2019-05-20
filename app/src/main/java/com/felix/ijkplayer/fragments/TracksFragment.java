@@ -1,0 +1,163 @@
+package com.felix.ijkplayer.fragments;
+
+import android.app.Activity;
+import android.content.Context;
+import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
+import android.widget.TextView;
+
+import com.felix.ijkplayer.R;
+
+import java.util.Locale;
+
+import tv.danmaku.ijk.media.player.misc.ITrackInfo;
+
+public class TracksFragment extends Fragment {
+    private ListView mTrackListView;
+    private TrackAdapter mAdapter;
+
+    public interface ITrackHolder {
+        ITrackInfo[] getTrackInfo();
+
+        int getSelectedTrack(int trackType);
+
+        void selectTrack(int stream);
+
+        void deselectTrack(int stream);
+    }
+
+    @Nullable
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        ViewGroup viewGroup = (ViewGroup) inflater.inflate(R.layout.fragment_track_list, container, false);
+        mTrackListView = viewGroup.findViewById(R.id.track_list_view);
+        return viewGroup;
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        final Activity activity = getActivity();
+
+        mAdapter = new TrackAdapter(activity);
+        mTrackListView.setAdapter(mAdapter);
+
+        if (activity instanceof ITrackHolder) {
+            final ITrackHolder trackHolder = (ITrackHolder) activity;
+            mAdapter.setTrackHolder(trackHolder);
+
+            int selectedVideoTrack = trackHolder.getSelectedTrack(ITrackInfo.MEDIA_TRACK_TYPE_VIDEO);
+            int selectedAudioTrack = trackHolder.getSelectedTrack(ITrackInfo.MEDIA_TRACK_TYPE_AUDIO);
+            int selectedSubtitleTrack = trackHolder.getSelectedTrack(ITrackInfo.MEDIA_TRACK_TYPE_TIMEDTEXT);
+            if (selectedVideoTrack >= 0)
+                mTrackListView.setItemChecked(selectedVideoTrack, true);
+            if (selectedAudioTrack >= 0)
+                mTrackListView.setItemChecked(selectedAudioTrack, true);
+            if (selectedSubtitleTrack >= 0)
+                mTrackListView.setItemChecked(selectedSubtitleTrack, true);
+
+            mTrackListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, final int position, final long id) {
+                    TrackItem trackItem = (TrackItem) mTrackListView.getItemAtPosition(position);
+                    for (int i = 0; i < mAdapter.getCount(); ++i) {
+                        TrackItem compareItem = mAdapter.getItem(i);
+                        if (compareItem.mIndex == trackItem.mIndex)
+                            continue;
+
+                        if (compareItem.mTrackInfo.getTrackType() != trackItem.mTrackInfo.getTrackType())
+                            continue;
+
+                        if (mTrackListView.isItemChecked(i))
+                            mTrackListView.setItemChecked(i, false);
+                    }
+                    if (mTrackListView.isItemChecked(position)) {
+                        trackHolder.selectTrack(trackItem.mIndex);
+                    } else {
+                        trackHolder.deselectTrack(trackItem.mIndex);
+                    }
+                }
+            });
+        } else {
+            Log.e("TracksFragment", "activity is not an instance of ITrackHolder.");
+        }
+    }
+
+    final class TrackItem {
+        public int mIndex;
+        public ITrackInfo mTrackInfo;
+        public String mInfoInline;
+
+        public TrackItem(int mIndex, ITrackInfo miTrackInfo) {
+            this.mIndex = mIndex;
+            this.mTrackInfo = miTrackInfo;
+            mInfoInline = String.format(Locale.US, "# %d: %s", mIndex, miTrackInfo.getInfoInline());
+        }
+
+        public String getInfoInline() {
+            return mInfoInline;
+        }
+    }
+
+    final class TrackAdapter extends ArrayAdapter<TrackItem> {
+        private ITrackHolder mtrackHolder;
+        private ITrackInfo[] mtrackInfos;
+
+        public TrackAdapter(@NonNull Context context) {
+            super(context, android.R.layout.simple_list_item_checked);
+        }
+
+        public void setTrackHolder(ITrackHolder trackHolder) {
+            clear();
+            mtrackHolder = trackHolder;
+            mtrackInfos = mtrackHolder.getTrackInfo();
+            if (mtrackInfos != null) {
+                for (ITrackInfo trackInfo : mtrackInfos) {
+                    int index = getCount();
+                    TrackItem item = new TrackItem(index, trackInfo);
+                    add(item);
+                }
+            }
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return position;
+        }
+
+        @NonNull
+        @Override
+        public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
+            View view = convertView;
+            if (view == null) {
+                LayoutInflater inflater = LayoutInflater.from(parent.getContext());
+                view = inflater.inflate(android.R.layout.simple_list_item_checked, parent, false);
+            }
+            ViewHolder viewHolder = (ViewHolder) view.getTag();
+            if (viewHolder == null) {
+                viewHolder = new ViewHolder();
+                viewHolder.mNameTextView = (TextView) view.findViewById(android.R.id.text1);
+            }
+
+            TrackItem item = getItem(position);
+            viewHolder.mNameTextView.setText(item.getInfoInline());
+
+            return view;
+        }
+        final class ViewHolder {
+            public TextView mNameTextView;
+        }
+    }
+
+
+}
+

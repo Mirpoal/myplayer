@@ -13,6 +13,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.felix.ijkplayer.R;
+import com.felix.ijkplayer.activities.SettingsActivity;
 
 /**
  *  All Activity base on AppActivity
@@ -65,7 +66,7 @@ public class AppActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.action_settings) {
-
+            SettingsActivity.intentTo(this);
         } else if (id == R.id.action_recent) {
 
         } else if (id ==R.id.action_sample) {
