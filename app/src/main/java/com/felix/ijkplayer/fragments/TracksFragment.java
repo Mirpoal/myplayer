@@ -25,14 +25,9 @@ public class TracksFragment extends Fragment {
     private ListView mTrackListView;
     private TrackAdapter mAdapter;
 
-    public interface ITrackHolder {
-        ITrackInfo[] getTrackInfo();
-
-        int getSelectedTrack(int trackType);
-
-        void selectTrack(int stream);
-
-        void deselectTrack(int stream);
+    public static TracksFragment newInstance() {
+        TracksFragment f = new TracksFragment();
+        return f;
     }
 
     @Nullable
@@ -90,6 +85,16 @@ public class TracksFragment extends Fragment {
         } else {
             Log.e("TracksFragment", "activity is not an instance of ITrackHolder.");
         }
+    }
+
+    public interface ITrackHolder {
+        ITrackInfo[] getTrackInfo();
+
+        int getSelectedTrack(int trackType);
+
+        void selectTrack(int stream);
+
+        void deselectTrack(int stream);
     }
 
     final class TrackItem {
@@ -153,7 +158,7 @@ public class TracksFragment extends Fragment {
 
             return view;
         }
-        final class ViewHolder {
+        private final class ViewHolder {
             public TextView mNameTextView;
         }
     }

@@ -1,9 +1,9 @@
 package com.felix.ijkplayer.content;
 
-import android.content.AsyncTaskLoader;
 import android.content.Context;
 import android.database.Cursor;
 import android.os.Environment;
+import android.support.v4.content.AsyncTaskLoader;
 
 import java.io.File;
 

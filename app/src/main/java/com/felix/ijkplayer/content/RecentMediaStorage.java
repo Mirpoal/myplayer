@@ -2,6 +2,7 @@ package com.felix.ijkplayer.content;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.os.AsyncTask;
@@ -36,13 +37,27 @@ public class RecentMediaStorage {
         save(cv);
     }
 
-    public static final String ALL_COLUMNS[] = new String[] {
-            Entry.COLUMN_NAME_ID + " as _id",
-            Entry.COLUMN_NAME_ID,
-            Entry.COLUMN_NAME_URL,
-            Entry.COLUMN_NAME_NAME,
-            Entry.COLUMN_NAME_LAST_ACCESS
-    };
+    public void save(ContentValues contentValue) {
+        OpenHelper openHelper = new OpenHelper(mAppContext);
+        SQLiteDatabase db = openHelper.getWritableDatabase();
+        db.replace(Entry.TABLE_NAME, null, contentValue);
+    }
+
+    public static String getNameOfUrl(String url) {
+        return getNameOfUrl(url, "");
+    }
+
+    public static String getNameOfUrl(String url, String defaultName) {
+        String name = null;
+        int pos = url.lastIndexOf('/');
+        if (pos >= 0)
+            name = url.substring(pos + 1);
+
+        if (TextUtils.isEmpty(name))
+            name = defaultName;
+
+        return name;
+    }
 
     public static class Entry {
         public static final String TABLE_NAME = "RecentMedia";
@@ -52,21 +67,12 @@ public class RecentMediaStorage {
         public static final String COLUMN_NAME_LAST_ACCESS = "last_access";
     }
 
-    public static String getNameOfUrl(String url, String defaultName) {
-        String name = null;
-        int pos = url.lastIndexOf('/');
-        if (pos >= 0) {
-            name = url.substring(pos + 1);
-        }
-        if (TextUtils.isEmpty(name)) {
-            name = defaultName;
-        }
-        return name;
-    }
-
-    public static String getNameOfUrl(String url) {
-        return getNameOfUrl(url, "");
-    }
+    public static final String ALL_COLUMNS[] = new String[]{
+            Entry.COLUMN_NAME_ID + " as _id",
+            Entry.COLUMN_NAME_ID,
+            Entry.COLUMN_NAME_URL,
+            Entry.COLUMN_NAME_NAME,
+            Entry.COLUMN_NAME_LAST_ACCESS};
 
     public static class OpenHelper extends SQLiteOpenHelper {
         private static final int DATABASE_VERSION = 1;
@@ -74,10 +80,10 @@ public class RecentMediaStorage {
         private static final String SQL_CREATE_ENTRIES =
                 "CREATE TABLE IF NOT EXISTS " + Entry.TABLE_NAME +
                 " (" +
-                        Entry.COLUMN_NAME_ID + "INTERGE PRIMARY KEY AUTOINCREMENT," +
+                        Entry.COLUMN_NAME_ID + "INTEGER PRIMARY KEY AUTOINCREMENT," +
                         Entry.COLUMN_NAME_URL + "VARCHAR UNIQUE," +
                         Entry.COLUMN_NAME_NAME + "VARCHAR," +
-                        Entry.COLUMN_NAME_LAST_ACCESS + "INTERGE" +
+                        Entry.COLUMN_NAME_LAST_ACCESS + "INTEGER" +
                 ")";
 
         public OpenHelper(Context context) {
@@ -95,13 +101,7 @@ public class RecentMediaStorage {
         }
     }
 
-    public void save(ContentValues contentValues) {
-        OpenHelper openHelper = new OpenHelper(mAppContext);
-        SQLiteDatabase db = openHelper.getWritableDatabase();
-        db.replace(Entry.TABLE_NAME, null, contentValues);
-    }
-
-    public static class CursorLoader extends AsyncTaskLoader {
+    public static class CursorLoader extends AsyncTaskLoader<Cursor> {
 
         public CursorLoader(@NonNull Context context) {
             super(context);
@@ -109,13 +109,14 @@ public class RecentMediaStorage {
 
         @Nullable
         @Override
-        public Object loadInBackground() {
+        public Cursor loadInBackground() {
             Context context = getContext();
             OpenHelper openHelper = new OpenHelper(context);
             SQLiteDatabase db = openHelper.getReadableDatabase();
 
             return db.query(Entry.TABLE_NAME, ALL_COLUMNS, null, null, null, null,
-                    Entry.COLUMN_NAME_LAST_ACCESS + " DESC", "100");
+                    Entry.COLUMN_NAME_LAST_ACCESS + " DESC",
+                    "100");
         }
 
         @Override

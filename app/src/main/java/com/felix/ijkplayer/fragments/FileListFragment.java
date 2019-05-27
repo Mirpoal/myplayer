@@ -1,5 +1,6 @@
 package com.felix.ijkplayer.fragments;
 
+import android.app.Activity;
 import android.content.Context;
 import android.database.Cursor;
 import android.os.Bundle;
@@ -8,19 +9,24 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.support.v4.widget.SimpleCursorAdapter;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 
 import com.felix.ijkplayer.R;
 import com.felix.ijkplayer.content.PathCursor;
+import com.felix.ijkplayer.content.PathCursorLoader;
+import com.felix.ijkplayer.eventbus.FileExplorerEvents;
 
-public class FileListFragment extends Fragment implements LoaderManager.LoaderCallbacks {
+import java.io.File;
+
+public class FileListFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
     private static final String ARG_PATH = "path";
 
     private TextView mPathView;
@@ -29,26 +35,74 @@ public class FileListFragment extends Fragment implements LoaderManager.LoaderCa
 
     private String mPath;
 
+    public static FileListFragment newInstance(String path) {
+        FileListFragment f = new FileListFragment();
+
+        Bundle args = new Bundle();
+        args.putString(ARG_PATH, path);
+        f.setArguments(args);
+
+        return f;
+    }
+
+    @Nullable
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        ViewGroup viewGroup = (ViewGroup) inflater.inflate(R.layout.fragment_file_list, container, false);
+        mPathView = viewGroup.findViewById(R.id.path_view);
+        mFileListView = viewGroup.findViewById(R.id.file_list_view);
+        mPathView.setVisibility(View.VISIBLE);
+        return viewGroup;
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        Activity activity = getActivity();
+
+        Bundle bundle = getArguments();
+        if (bundle != null) {
+            mPath = bundle.getString(ARG_PATH);
+            mPath = new File(mPath).getAbsolutePath();
+            mPathView.setText(mPath);
+        }
+        mAdapter = new VideoAdapter(activity);
+        mFileListView.setAdapter(mAdapter);
+        mFileListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+                String path = mAdapter.getFilePath(position);
+                if (TextUtils.isEmpty(path))
+                    return;
+                FileExplorerEvents.getBus().post(new FileExplorerEvents.OnClickFile(path));
+            }
+        });
+
+        getLoaderManager().initLoader(1, null, this);
+    }
+
     @NonNull
     @Override
-    public Loader onCreateLoader(int i, @Nullable Bundle bundle) {
+    public Loader<Cursor> onCreateLoader(int i, @Nullable Bundle bundle) {
         if (TextUtils.isEmpty(mPath))
             return null;
-
+        return new PathCursorLoader(getActivity(), mPath);
     }
 
     @Override
-    public void onLoadFinished(@NonNull Loader loader, Object o) {
-
+    public void onLoadFinished(@NonNull Loader<Cursor> loader, Cursor cursor) {
+        mAdapter.swapCursor(cursor);
+        mAdapter.notifyDataSetChanged();
     }
 
     @Override
-    public void onLoaderReset(@NonNull Loader loader) {
+    public void onLoaderReset(@NonNull Loader<Cursor> loader) {
 
     }
 
-    private class VideoAdapter extends SimpleCursorAdapter {
-        private class ViewHodler {
+    final class VideoAdapter extends SimpleCursorAdapter {
+        final class ViewHolder {
             public ImageView iconImageView;
             public TextView nameTextView;
         }
@@ -67,20 +121,21 @@ public class FileListFragment extends Fragment implements LoaderManager.LoaderCa
                 view = inflater.inflate(R.layout.fragment_file_list_item, parent, false);
             }
 
-            ViewHodler viewHodler = (ViewHodler) view.getTag();
-            if (viewHodler == null) {
-                viewHodler = new ViewHodler();
-                viewHodler.iconImageView = view.findViewById(R.id.icon);
-                viewHodler.nameTextView = view.findViewById(R.id.name);
+            ViewHolder viewHolder = (ViewHolder) view.getTag();
+            if (viewHolder == null) {
+                viewHolder = new ViewHolder();
+                viewHolder.iconImageView = view.findViewById(R.id.icon);
+                viewHolder.nameTextView = view.findViewById(R.id.name);
             }
 
             if (isDirectory(position)) {
-                viewHodler.iconImageView.setImageResource(R.drawable.ic_theme_folder);
+                viewHolder.iconImageView.setImageResource(R.drawable.ic_theme_folder);
             } else if (isVideo(position)) {
-                viewHodler.iconImageView.setImageResource(R.drawable.ic_theme_play_arrow);
+                viewHolder.iconImageView.setImageResource(R.drawable.ic_theme_play_arrow);
             } else {
-                viewHodler.nameTextView.setText(getFileName(position));
+                viewHolder.iconImageView.setImageResource(R.drawable.ic_theme_description);
             }
+            viewHolder.nameTextView.setText(getFileName(position));
 
             return view;
         }

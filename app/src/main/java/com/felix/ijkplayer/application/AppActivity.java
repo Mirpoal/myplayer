@@ -13,6 +13,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.felix.ijkplayer.R;
+import com.felix.ijkplayer.activities.RecentMediaActivity;
+import com.felix.ijkplayer.activities.SampleMediaActivity;
 import com.felix.ijkplayer.activities.SettingsActivity;
 
 /**
@@ -36,7 +38,8 @@ public class AppActivity extends AppCompatActivity {
                     Manifest.permission.READ_EXTERNAL_STORAGE)) {
                 // TODO : show explanation
             } else {
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                ActivityCompat.requestPermissions(this, 
+						new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
                         MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE);
             }
 
@@ -67,13 +70,20 @@ public class AppActivity extends AppCompatActivity {
         int id = item.getItemId();
         if (id == R.id.action_settings) {
             SettingsActivity.intentTo(this);
+            return true;
         } else if (id == R.id.action_recent) {
-
+            RecentMediaActivity.intentTo(this);
         } else if (id ==R.id.action_sample) {
-
+            SampleMediaActivity.intentTo(this);
         }
         return super.onOptionsItemSelected(item);
     }
 
-
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        boolean show = super.onPrepareOptionsMenu(menu);
+        if (!show)
+            return show;
+        return true;
+    }
 }

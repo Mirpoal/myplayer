@@ -39,8 +39,8 @@ public class PathCursor extends AbstractCursor {
             for (File file : fileList) {
                 mFileList.add(new FileItem(file));
             }
+			Collections.sort(this.mFileList, sComparator);
         }
-        Collections.sort(this.mFileList, sComparator);
     }
 
     @Override
@@ -123,6 +123,10 @@ public class PathCursor extends AbstractCursor {
         public File file;
         public boolean isDirectory;
         public boolean isVideo;
+
+        public FileItem(String file) {
+            this(new File(file));
+        }
 
         public FileItem(File file) {
             this.file = file;

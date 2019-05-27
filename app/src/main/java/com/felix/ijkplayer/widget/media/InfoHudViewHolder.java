@@ -7,9 +7,10 @@ import android.util.SparseArray;
 import android.view.View;
 import android.widget.TableLayout;
 
+import com.felix.ijkplayer.R;
+
 import java.util.Locale;
 
-import tv.danmaku.ijk.media.example.R;
 import tv.danmaku.ijk.media.player.IMediaPlayer;
 import tv.danmaku.ijk.media.player.IjkMediaPlayer;
 import tv.danmaku.ijk.media.player.MediaPlayerProxy;

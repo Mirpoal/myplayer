@@ -18,6 +18,7 @@ import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 
 import com.felix.ijkplayer.R;
+import com.felix.ijkplayer.activities.VideoActivity;
 import com.felix.ijkplayer.content.RecentMediaStorage;
 
 public class RecentMediaListFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
@@ -50,14 +51,11 @@ public class RecentMediaListFragment extends Fragment implements LoaderManager.L
                 String url = mediaAdapter.getUrl(position);
                 String name = mediaAdapter.getName(position);
                 // start videoactivity
-                //VideoActivity.intentTo(activity, url, name);
+                VideoActivity.intentTo(activity, url, name);
             }
         });
-    }
 
-    @Override
-    public Lifecycle getLifecycle() {
-        return super.getLifecycle();
+        getLoaderManager().initLoader(2, null, this);
     }
 
     @NonNull
@@ -82,9 +80,9 @@ public class RecentMediaListFragment extends Fragment implements LoaderManager.L
         private int mIndex_name = -1;
 
         public RecentMediaAdapter(Context context) {
-            super(context, R.layout.simple_list_item_2, null,
+            super(context, android.R.layout.simple_list_item_2, null,
                     new String[]{RecentMediaStorage.Entry.COLUMN_NAME_NAME, RecentMediaStorage.Entry.COLUMN_NAME_URL},
-                    new int[]{R.id.text1, R.id.text2}, 0);
+                    new int[]{android.R.id.text1, android.R.id.text2}, 0);
         }
 
         @Override

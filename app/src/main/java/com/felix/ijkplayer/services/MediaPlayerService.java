@@ -24,7 +24,6 @@ public class MediaPlayerService extends Service {
         context.stopService(newIntent(context));
     }
 
-
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {

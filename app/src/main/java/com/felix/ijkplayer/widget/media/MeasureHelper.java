@@ -21,9 +21,9 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import android.view.View;
 
-import java.lang.ref.WeakReference;
+import com.felix.ijkplayer.R;
 
-import tv.danmaku.ijk.media.example.R;
+import java.lang.ref.WeakReference;
 
 public final class MeasureHelper {
     private WeakReference<View> mWeakView;

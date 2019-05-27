@@ -25,7 +25,7 @@ import android.view.ViewGroup;
 import android.widget.TableLayout;
 import android.widget.TextView;
 
-import tv.danmaku.ijk.media.example.R;
+import com.felix.ijkplayer.R;
 
 public class TableLayoutBinder {
     private Context mContext;
